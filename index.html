@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo-List | Vue.js Projec2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Start ToDo List -->
+    <div class="todo" @click.self="doneModifying()">
+      <div class="heading">
+        <h1>ToDo List By <span> Vue.js </span></h1>
+      </div>
+      <div class="holder">
+        <div class="input-holder">
+          <input @keyup.enter="addNewTask()" class="task-input" type="text" placeholder="What Needs To Be Done" v-model="newTaskValue">
+        </div>
+        <div class="body-holder">
+          <ul>
+            <li v-for="task in filteredTasks" @dblclick="modifyTask(task)" :class="{modify:task==taskModified}">
+              <input type="checkbox" v-model="task.activation">
+              <!--  الكود دة عبارة عن انه هيستخدم كلاس تشيكد فى حالة التاسك اكتيفشن = ترو h3 -->
+              <h3 :class="{checked:task.activation == true}">{{ task.title }}</h3>
+              <input type="text" v-model="task.title" @keyup.enter="doneModifying()">
+              <span @click="deleteTask(task)">X</span>
+            </li>
+          </ul>
+        </div>
+        <div class="info">
+          <div class="tasks-number">
+            <h5><span>{{calcTasks}}</span> {{remaininItems}} Left</h5>
+          </div>
+          <div class="information">
+            <button class="active" @click.prevent="visibility = 'all'">All</button>
+            <button @click.prevent="visibility = 'active'">Active</button>
+            <button @click.prevent="visibility = 'completed'">Completed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End ToDo List -->
+
+    <script src="vue.min.js"></script>
+    <script>
+      var tasksFelter = {
+        "all": function (tasks) {
+          return tasks
+        },
+        "completed": function (tasks) {
+          return tasks.filter(function (task) {
+            return task.activation
+          });
+        },
+        "active": function (tasks) {
+          return tasks.filter(function (task) {
+            return ! task.activation
+          });
+        }
+      };
+      var tasks_storage = {
+        fetch: function(){
+          var tasks = JSON.parse( localStorage.getItem('tasks') || '[]');
+
+          return tasks;
+        },
+        save: function(tasks){
+          localStorage.setItem('tasks', JSON.stringify(tasks) );
+        }
+      };
+      new Vue({
+          el: ".todo",
+          data: {
+            newTaskValue: '',
+            checkedClass: 'checked',
+            tasks: tasks_storage.fetch(),
+            visibility: 'all',
+            taskModified: null,
+            defaultTasks: [
+              {
+                title: 'koko is  here',
+                activation: false
+              }
+            ]
+          },
+          methods: {
+            addNewTask: function () {
+              if (this.newTaskValue !== '') {
+                this.tasks.unshift({
+                  title: this.newTaskValue,
+                  activation: false
+                });
+                this.newTaskValue = '';
+                document.querySelector('.task-input').focus()
+              }
+            },
+            deleteTask: function (task) {
+              this.tasks.splice(this.tasks.indexOf(task), 1)
+            },
+            modifyTask: function (task) {
+              this.taskModified = task
+            },
+            doneModifying: function (){
+              if (this.taskModified.title.length === 0) {
+                this.deleteTask(this.taskModified);
+              } else{
+                this.taskModified = null
+              }
+            }
+          },
+          computed: {
+            calcTasks: function () {
+              return this.tasks.length
+            },
+            filteredTasks: function () {
+              return tasksFelter[this.visibility] (this.tasks)
+              console.log('filteredTasks');
+            },
+            remaininItems: function () {
+              if (this.tasks.length === 1) {
+                return 'task'
+              } else{
+                return 'tasks'
+              }
+            }
+          },
+          watch: {
+            tasks: {
+              handler: function(tasks){
+                tasks_storage.save(tasks);
+                console.log('ahmed is lkjsad')
+              },
+              deep: true
+            }
+          }
+      });
+      
+      let taskStates = document.querySelectorAll('.information button');
+
+      taskStates.forEach(element => {
+        element.addEventListener('click', function () {
+          taskStates.forEach(element => {
+            element.classList.remove('active')
+          })
+          element.classList.add('active')
+        })
+      });
+      
+    </script>
+</body>
+</html>
