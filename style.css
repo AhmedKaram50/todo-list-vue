@@ -96,7 +96,7 @@
   }
   .todo .holder .body-holder ul li h3.checked{
     text-decoration: line-through;
-    color: rgb(53 73 94 / 74%);
+    color: rgb(53 73 94 / 75%);
   }
   .todo .holder .info{
     display: flex;
